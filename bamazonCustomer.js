@@ -38,54 +38,6 @@ function readProducts() {
   });
 }
 
-function makePurchase(answers) {
-  // First check if there is sufficient quantity
-  console.log('Checking Product Stock Level...\n');
-  prodID = answers.id;
-  prodQuant = answers.units;
-  console.log(prodID);
-
-  const sql = `SELECT stock_quantity FROM products Where item_id = ${connection.escape(prodID)}`;
-  connection.query(sql, (err, res) => {
-    if (err) throw err;
-    // Log all results of the SELECT statement
-    console.log(res[0].stock_quantity);
-    const result = res[0].stock_quantity;
-    if (result > prodQuant) {
-      // Update quantity
-      const updatedQuant = result - prodQuant;
-
-      // Calculate Cost
-      const costResult = cost(prodID, prodQuant);
-      console.log(`Cost Result: ${costResult}`);
-
-      // Make the purchase
-      console.log(`Completing the Purchase...\nYour total cost is ${costResult}`);
-
-      const query = connection.query(
-        'UPDATE products SET ? WHERE ?',
-        [
-          {
-            stock_quantity: updatedQuant,
-          },
-          {
-            item_id: answers.id,
-          },
-        ],
-        (err, res) => {
-          if (err) throw err;
-          console.log(`${res.affectedRows} products updated!\n`);
-          // todo Show updated quant
-        },
-      );
-    } else {
-      console.log(
-        'Stock Quantity Insufficient, unable to complete the purchase.\nTry again tomorrow, thank you.',
-      );
-    }
-  });
-}
-
 function inqBuy() {
   inquirer
     .prompt([
@@ -101,30 +53,89 @@ function inqBuy() {
       },
     ])
     .then((answers) => {
-      console.log(answers);
+      // console.log(answers);
       // Call makePurchase function, pass the answers object
       makePurchase(answers);
     });
 }
 
+function makePurchase(answers) {
+  // First check if there is sufficient quantity
+  console.log('Checking Product Stock Level...\n');
+  prodID = answers.id;
+  prodQuant = answers.units;
+  // console.log(prodID);
+
+  // Make the query based on the prodID
+  const sql = `SELECT stock_quantity FROM products Where item_id = ${connection.escape(prodID)}`;
+  connection.query(sql, (err, res) => {
+    if (err) throw err;
+
+    // console.log(res[0].stock_quantity);
+
+    // Get the stock quantity
+    const result = res[0].stock_quantity;
+
+    // Make sure there is enough stock
+    if (result > prodQuant) {
+      // Update quantity
+      const updatedQuant = result - prodQuant;
+
+      // Calculate Cost and complete the purchase
+      cost(prodID, prodQuant, updatedQuant);
+      // console.log(`Cost Result: ${costResult}`);
+    } else {
+      console.log(
+        'Stock Quantity Insufficient, unable to complete the purchase.\nTry again tomorrow, thank you.',
+      );
+
+      // Restart
+      readProducts();
+    }
+  });
+}
+
 // Get the price
-function cost(prodID, prodQuant) {
+function cost(prodID, prodQuant, updatedQuant) {
+  // console.log(`Product Id: ${prodID}, Product Quant: ${prodQuant}`);
+
   const sql = `SELECT price FROM products Where item_id = ${connection.escape(prodID)}`;
   connection.query(sql, (err, res) => {
     if (err) throw err;
     // Log all results of the SELECT statement
-    console.log(res);
+    // console.log(res);
 
     // console.log(res[0].price);
     const price = res[0].price;
 
     const calcCost = price * prodQuant;
-    // console.log(calcCost);
+    // console.log(`Cost!!: ${calcCost}`);
 
-    return calcCost;
+    // return calcCost;
+    // Make the purchase
+    console.log(`Completing the Purchase...\nYour total cost is ${calcCost}`);
+
+    const query = connection.query(
+      'UPDATE products SET ? WHERE ?',
+      [
+        {
+          stock_quantity: updatedQuant,
+        },
+        {
+          item_id: prodID,
+        },
+      ],
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} products updated!\n`);
+        // todo Show updated quant
+        readProducts();
+      },
+    );
 
     // connection.end();
   });
 }
 
 //! Need to quit connection!!!!!
+//! Need an Exit option
