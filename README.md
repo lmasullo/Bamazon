@@ -40,7 +40,7 @@ The app uses the following NPM packages:
 
 ## Demo (Click the Image to View the Demo Video)
 
-[![Watch the video](images/main2.png)](https://www.youtube.com/embed/bpQuRmCGmow "Main Menu")
+[![Watch the video](images/main.png)](https://www.youtube.com/embed/bpQuRmCGmow "Main Menu")
 
 ## GitHub Repo
 https://github.com/lmasullo/Bamazon
