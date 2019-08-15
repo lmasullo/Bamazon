@@ -1,7 +1,7 @@
 // Check for the connected js file
 // console.log('BamazonCustomer.js Connected!');
 
-// Load dotenv package
+// Load dotenv package to store mysql variables
 require('dotenv').config();
 
 // Require npm module mysql
