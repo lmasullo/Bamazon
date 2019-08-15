@@ -1,3 +1,4 @@
+// Check for the connected js file
 console.log('BamazonCustomer.js Connected!');
 
 // Require npm module mysql
@@ -6,6 +7,7 @@ const mysql = require('mysql');
 // Require the inquirer npm package
 const inquirer = require('inquirer');
 
+// Set the global variables
 let prodID = 0;
 let prodQuant = 0;
 
@@ -14,17 +16,20 @@ const connection = mysql.createConnection({
   host: 'localhost',
   port: 3306,
   user: 'root',
-  password: 'password',
+  password: 'Laxman27',
   database: 'bamazon',
 });
 
+// Make connection
 connection.connect((err) => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}`);
-  // Call the Read Products
+
+  // Call the Read Products function
   readProducts();
 });
 
+// Function to get all the products
 function readProducts() {
   console.log('Selecting all products...\n');
   connection.query('SELECT * FROM products', (err, res) => {
@@ -36,29 +41,48 @@ function readProducts() {
     // Call the Initial Buy Inquirer
     inqBuy();
   });
-}
+}// End readProducts
 
+// Function to start the questions
 function inqBuy() {
   inquirer
+  // First prompt if want to exit or continue
     .prompt([
       {
-        type: 'input',
-        message: 'Type the ID of the product you would like to buy?',
-        name: 'id',
-      },
-      {
-        type: 'input',
-        message: 'How many units of the product would you like to buy?',
-        name: 'units',
+        type: 'confirm',
+        name: 'exit',
+        message: 'Exit',
       },
     ])
     .then((answers) => {
-      // console.log(answers);
-      // Call makePurchase function, pass the answers object
-      makePurchase(answers);
+      // If choose exit, show message and end connection
+      if (answers.exit === true) {
+        console.log('Thank you for shopping, come again!');
+        connection.end();
+        return false;
+      }
+      // If want to continue, prompt for what to buy
+      inquirer
+        .prompt([
+          {
+            type: 'input',
+            message: 'Type the ID of the product you would like to buy?',
+            name: 'id',
+          },
+          {
+            type: 'input',
+            message: 'How many units of the product would you like to buy?',
+            name: 'units',
+          },
+        ])
+        .then((answers) => {
+          // Call makePurchase function, pass the answers object
+          makePurchase(answers);
+        });
     });
-}
+}// End inqBuy
 
+// Function to make the purchase
 function makePurchase(answers) {
   // First check if there is sufficient quantity
   console.log('Checking Product Stock Level...\n');
@@ -93,9 +117,9 @@ function makePurchase(answers) {
       readProducts();
     }
   });
-}
+}// End makePurchase
 
-// Get the price
+// Get the price and calculate cost
 function cost(prodID, prodQuant, updatedQuant) {
   // console.log(`Product Id: ${prodID}, Product Quant: ${prodQuant}`);
 
@@ -106,15 +130,15 @@ function cost(prodID, prodQuant, updatedQuant) {
     // console.log(res);
 
     // console.log(res[0].price);
-    const price = res[0].price;
+    const { price } = res[0];
 
     const calcCost = price * prodQuant;
     // console.log(`Cost!!: ${calcCost}`);
 
-    // return calcCost;
     // Make the purchase
     console.log(`Completing the Purchase...\nYour total cost is ${calcCost}`);
 
+    // Update the db
     const query = connection.query(
       'UPDATE products SET ? WHERE ?',
       [
@@ -128,14 +152,9 @@ function cost(prodID, prodQuant, updatedQuant) {
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} products updated!\n`);
-        // todo Show updated quant
+        // Show updated quant
         readProducts();
       },
     );
-
-    // connection.end();
   });
-}
-
-//! Need to quit connection!!!!!
-//! Need an Exit option
+}// End cost
