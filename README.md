@@ -43,7 +43,7 @@ The app uses the following NPM packages:
 [![Watch the video](images/main2.png)](https://www.youtube.com/embed/bpQuRmCGmow "Main Menu")
 
 ## GitHub Repo
-https://github.com/lmasullo/node-word-guess
+https://github.com/lmasullo/Bamazon
 
 ## Versioning
 
