@@ -70,11 +70,29 @@ function inqBuy() {
             type: 'input',
             message: 'Type the ID of the product you would like to buy?',
             name: 'id',
+            // Validate that the user enters a Number
+            validate(value) {
+              if (isNaN(value) === false) {
+                return true;
+              }
+              // Prompt for a Number
+              console.log('Please select a Number');
+              return false;
+            },
           },
           {
             type: 'input',
             message: 'How many units of the product would you like to buy?',
             name: 'units',
+            // Validate that the user enters a Number
+            validate(value) {
+              if (isNaN(value) === false) {
+                return true;
+              }
+              // Prompt for a Number
+              console.log('Please select a Number');
+              return false;
+            },
           },
         ])
         .then((answers) => {
